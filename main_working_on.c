@@ -44,7 +44,7 @@ int socket_connect(char *host, in_port_t port){
 
 char* generateGET(char* path, char* addr, char*user_agent){
     char* request = (char*)malloc(sizeof(char)*200);
-    sprintf(request, "GET /%s HTTP/1.1\r\nHost: %s\r\nUser-Agent:%s\r\nContent-Type: text/plain\r\n\r\n", path, addr, user_agent);
+    sprintf(request, "GET /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nContent-Type: text/plain\r\n\r\n", path, addr, user_agent);
     return request;
 
 
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]){
 		fprintf(stderr, "%s", buffer);
 		bzero(buffer, BUFFER_SIZE);
 	}
-   
+ 
 	shutdown(fd, SHUT_RDWR); 
 	close(fd); 
 
