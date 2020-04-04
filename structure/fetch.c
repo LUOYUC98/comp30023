@@ -2,6 +2,7 @@
 
 
 
+
 char* generateGET(char* path, char* addr, char*user_agent){
     char* request = (char*)malloc(sizeof(char)*200);
     sprintf(request, "GET /%s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nContent-Type: text/plain\r\n\r\n", path, addr, user_agent);
@@ -30,7 +31,7 @@ void get_response(int fd, char* path, char* domain, char* port_number, char* use
   printf("\n\n%s", html_buffer);
 
   if(get_status_code() == 200){
-    strcpy(parent_domain_buffer, domain);
+    strcpy(parent_addr_buffer, domain);
   }
 	shutdown(fd, SHUT_RDWR); 
 	close(fd); 
@@ -40,7 +41,7 @@ void get_response(int fd, char* path, char* domain, char* port_number, char* use
 
   
 char* get_html_start(){
-    char* start = strstr(html_buffer, "\r\n\r\n");
+    char* start = strstr(html_buffer, "\n\n");
     if(start == NULL){printf("\n\nNOT FOUND\n\n");}
     printf("\n\nHTML:\n%s\n\n", start);
    return start;
@@ -59,7 +60,23 @@ int get_status_code(){
   printf("\nstatus code: %d\n", code);
   return code;
 }
-  
+
+
+
+  int not_truncated(){
+    char* content_length = strstr(html_buffer, "Content-Length: ")+strlen("Content-Length: ");
+    char length_char[5];
+    for(int i = 0; isdigit(content_length[i]) != 0; i++){
+      length_char[i] = content_length[i];
+    }
+    int length = atoi(length_char);
+    char* html_start = get_html_start();
+    return strlen(html_start) == length;
+
+}
+
+
+
 
 
 int content_type_is_text(){
@@ -67,40 +84,47 @@ int content_type_is_text(){
 }
 
 
-char* url_ok(char* domain, char* url_str){
+char* url_ok(char* url){
 // check #?. in path
-  if(contain_punc(get_path(url_str)) != 0){return NULL;}
+  if(contain_punc(url) != 0){return NULL;}
   char* new_url = NULL;
   //complete url
-  if(get_domain(url_str)!=NULL){
-    new_url = (char*)malloc(MAX_DOMAIN_LEN+1);
-    domain = NULL;
-    strcpy(new_url, url_str);
+  if(strstr(url, "http://")!=NULL){
+    printf("find http: \n");
+    printf("url_ok = %s\n", strstr(url, "http://")+strlen("http://"));
+    return strstr(url, "http://")+strlen("http://");
   }
-  char* p;
+ 
   //if // appears, simply get the followings
-  if((p = strstr(url_str, "//")) != NULL){
-    new_url = (char*)malloc(MAX_DOMAIN_LEN+1);
-    strcpy(new_url, p+2);
+  else if (strstr(url, "//") != NULL){
+    printf("url_ok = %s\n", strstr(url, "//")+strlen("//"));
+    return strstr(url, "//")+strlen("//");
     
   }
   
-  //just give path
-  else if (url_str[0]=='/'){
-    
-    new_url = (char*)malloc(MAX_DOMAIN_LEN+1);
-    strcpy(new_url, domain);
-    strcat(new_url, url_str);
-    
+  //just give full path
+  else if (url[0]=='/'){
+    char* parent_domain = get_domain(parent_addr_buffer);
+    new_url = (char*)malloc(strlen(parent_domain)+strlen(url)+1);
+    strcpy(new_url, parent_domain);
+    strcat(new_url, url);
+    printf("url_ok = %s\n", new_url);
   }
   
-  if(strstr(new_url,"http://")!=NULL){
-    new_url+=strlen("http://");
+  else if (isalpha(url[0])){
+    new_url = (char*)malloc(strlen(parent_addr_buffer)+strlen(url)+1+1);
+    strcpy(new_url, parent_addr_buffer);
+    if(parent_addr_buffer[strlen(parent_addr_buffer)-1] != '/'){
+      new_url[strlen(parent_addr_buffer)] = '/';
+    }
+    strcpy(new_url, url);
+    printf("url_ok = %s\n", new_url);
+    return new_url;
   }
+  
+    printf("unexpected url: %s\n", url);
 
-  printf("url_ok = %s\n", new_url);
-  return new_url;
-  
+  return NULL;
 }
 
 
@@ -128,9 +152,9 @@ char* get_path(char* url){
 }
 
 
-int contain_punc(char* path){
-  return strstr(path, "./") != NULL || strstr(path, "#") != NULL ||
-         strstr(path, "?") != NULL;
+int contain_punc(char* url){
+  return strstr(url, "./") != NULL || strstr(url, "#") != NULL ||
+         strstr(url, "?") != NULL;
 }
 
 
