@@ -31,13 +31,13 @@ void extract_matches(){
      char* fetched_url = read_url(start);
      html_cursor += strlen(fetched_url);
      printf("match = %s\n",fetched_url);
-     char* new_url = url_ok(parent_domain_buffer, fetched_url);
-   if(new_url!= NULL && need_crawl(new_url) && check_duplicate(new_url)!=0){
-     web_addr[++addr_index] = (char*)malloc(strlen(new_url)+1);
+     char* new_url = url_ok(fetched_url);
+   if(addr_index < MAX_URL_NUM && new_url!= NULL && need_crawl(new_url) && check_duplicate(new_url)!=0){
+      web_addr[++addr_index] = (char*)malloc(strlen(new_url)+1);
       strcpy(web_addr[addr_index], new_url);
     }
   }
-  bzero(parent_domain_buffer, strlen(parent_domain_buffer));
+  bzero(parent_addr_buffer, strlen(parent_addr_buffer));
   bzero(html_buffer, strlen(html_buffer));
 
 }
