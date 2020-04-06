@@ -3,7 +3,7 @@
 
 void print_cached_web_addr(){
   printf("---------web_addr-------\n");
-  for(int i = 0; i < addr_index; i++){
+  for(int i = 0; i <= addr_index; i++){
     printf("%dth addr: %s\n", i, web_addr[i]);
   }
     printf("----------------\n");
@@ -24,4 +24,3 @@ void print_html_buffer(){
   printf("----------------\n");
 }
 
- 
