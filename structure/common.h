@@ -17,25 +17,27 @@
 #define BUFF_SIZE 100
 #define MAX_DOMAIN_LEN 253
 #define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
 
 
 //global variable
-extern char html_buffer[MAX_RESPONSE+1];
+extern char html_buffer[5*MAX_RESPONSE+1];
 extern char* p_html_buffer;
 extern char*web_addr[MAX_URL_NUM+1];
 extern int addr_index;
 extern int addr_fetching_index;
-
+extern char url_buffer[MAX_URL_LEN+1];
 extern char parent_addr_buffer[MAX_URL_LEN+1];
 extern char input[MAX_DOMAIN_LEN+1];
+extern char request[200];
 
 
 //connect.c
 int socket_connect(char *host, in_port_t port);
 
 //fetch.c
-char* generateGET(char* path, char* addr, char*user_agent);
-void get_response(char* path, char* domain, char* port_number, char* user_agent);
+void generateGET(char* path, char* addr, char*user_agent);
+int get_response(char* path, char* domain, char* port_number, char* user_agent);
 char* get_html_start();
 int get_status_code();
 int contain_punc(char* path);
