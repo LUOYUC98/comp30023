@@ -30,14 +30,16 @@ extern char url_buffer[MAX_URL_LEN+1];
 extern char parent_addr_buffer[MAX_URL_LEN+1];
 extern char input[MAX_DOMAIN_LEN+1];
 extern char request[200];
+extern int authes[MAX_URL_NUM];
+//extern int
 
 
 //connect.c
 int socket_connect(char *host, in_port_t port);
 
 //fetch.c
-void generateGET(char* path, char* addr, char*user_agent);
-int get_response(char* path, char* domain, char* port_number, char* user_agent);
+void generateGET(char* path, char* addr, char*user_agent, int auth);
+ int get_response( char* domain);
 char* get_html_start();
 int get_status_code();
 int contain_punc(char* path);
@@ -49,8 +51,11 @@ int need_crawl(char* url);
 int not_truncated();
 int content_type_is_text();
 char* get_parent_url(char* url);
+char* get_location_301();
+int get_auth_type();
 //html_phase.c
 void extract_matches();
+void read_url(char* start);
 
 
 //rec_request.c
