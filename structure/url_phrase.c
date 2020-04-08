@@ -1,7 +1,8 @@
 #include "common.h"
 
 char* url_ok(char* url){
-  if(contain_punc(url) != 0 || strstr(url, "mailto:")!=NULL ){return NULL;}
+  //printf("url = %s\n", url);
+   if(contain_punc(url) != 0 || strstr(url, "mailto:")!=NULL || strstr(url, "ftp")!=NULL){return NULL;}
   char* new_url = NULL;
 
   /*
@@ -10,28 +11,38 @@ char* url_ok(char* url){
    *(split--) = '\0';
   }
   */
+  
     //complete url
+
+   //complete url
+   /*
    if(strstr(url, "http://www.")!=NULL){
     return strstr(url, "http://www.")+strlen("http://www.");
   }
-   
+   */
   if(strstr(url, "https://")!=NULL){
     return strstr(url, "https://")+strlen("https://");
   }
   
+  
   else if(strstr(url, "http://")!=NULL){
-    return strstr(url, "http://")+strlen("http:");
+    //printf("complete!!!!\n");
+    return strstr(url, "http://")+strlen("http://");
   }
 
    //complete url
+   /*
    else if(strstr(url, "www.")!=NULL){
     return strstr(url, "www.")+strlen("www.");
   }
+*/
+
+
 
 
   //if // appears, simply get the followings
-  else if (strstr(url, "//") != NULL){
-    return strstr(url, "//")+strlen("//");
+  else if (url[0]=='/' && url[1]=='/'){
+    return url+2;
     
   }
   
@@ -42,13 +53,15 @@ char* url_ok(char* url){
     new_url = (char*)malloc(strlen(parent_domain)+strlen(url)+1);
     strcpy(new_url, parent_domain);
     strcat(new_url+strlen(parent_domain), url);
+    //free(parent_domain);
     return new_url;
   }
   
   else if (isalpha(url[0])){
     new_url = (char*)malloc(strlen(parent_addr_buffer)+strlen(url)+1+1);
-    strcpy(new_url, get_parent_url( parent_addr_buffer));
-    strcpy(new_url+strlen(get_parent_url( parent_addr_buffer)), url);
+    char* parent_url = get_parent_url(parent_addr_buffer);
+    strcpy(new_url, parent_url);
+    strcpy(new_url+strlen(parent_url), url);
     return new_url;
   }
 
@@ -80,19 +93,21 @@ char* get_path(char* url){
   return url;
 }
 
-
 int contain_punc(char* url){
-  return strstr(url, "./") != NULL || strstr(url, "#") != NULL ||
+ 
+  return strstr(url, "..") != NULL||strstr(url, "./") != NULL || strstr(url, "#") != NULL ||
          strstr(url, "?") != NULL || strstr(url, "%") != NULL;
 }
 
 
 int check_duplicate(char* url){
+  int count = 0;
   for(int i = 0; i<= addr_index; i++){
     if(strcmp(url, web_addr[i]) == 0){
-      return 0;}
+      count++;
+      }
   }
-  return 1;
+  return count;
 }
 
 //assume url is complete url
@@ -102,9 +117,19 @@ int need_crawl(char* url){
   return !strcmp(strstr(url_domain, "."),strstr(input_domain, "."));
 }
 
-char* get_parent_url(char* url){  
-  if(strstr(url, "/") == NULL){return url;}
-    char* split = url+strlen(url)-1;
+
+
+
+
+
+char* get_parent_url(char* curr_fetching_url){ 
+
+  if(strstr(curr_fetching_url, "/") == NULL
+  || curr_fetching_url[strlen(curr_fetching_url)-1] == '/'){
+    //printf("NO need chunking: parent url = %s\n", curr_fetching_url);
+    return curr_fetching_url;
+    }
+    char* split = curr_fetching_url+strlen(curr_fetching_url)-1;
     while(*(split)!='/'){
       split--;
     }
@@ -112,6 +137,12 @@ char* get_parent_url(char* url){
      // printf("split: %s\n", split);
       split--;
     }
-    bzero(split+1, sizeof(split));
-    return url;
+    char* curr_url_chunk = malloc(strlen(curr_fetching_url));
+    strncpy(curr_url_chunk, curr_fetching_url, split - curr_fetching_url+1);
+    curr_url_chunk[strlen(curr_url_chunk)] = '/';
+
+    //bzero(split+1, sizeof(split));
+   // printf("need parent url = %s\n", url);
+    return curr_url_chunk;
 }
+
