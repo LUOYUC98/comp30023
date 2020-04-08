@@ -33,5 +33,34 @@ int get_status_code(){
 
 
 int content_type_is_text(){
- return strstr(html_buffer, "Content-Type: text/html") != NULL || strstr(html_buffer, "content-type: text/html") != NULL;
+ return strstr(html_buffer, "Content-Type: text/html") != NULL ||  strstr(html_buffer, "content-type: text/html") != NULL;
+}
+
+
+char* get_location_301(){
+    
+    // printf("html_buffer = %s\n", html_buffer);
+   
+
+     char*  start = strstr(html_buffer, "ocation: ")+strlen("ocation: ");
+    
+    p_html_buffer = start;
+    
+    int count = 0;
+    while(*(start)!='\"'&& *(start)!='\''&& *(start)!='\r'){
+      
+      count++;
+      start++;
+    }
+  char* redirect = (char*)malloc(count+1);
+  strncpy(redirect, p_html_buffer, count);
+  return redirect;
+}
+
+int get_auth_type(){
+   
+    char* basic = strstr(html_buffer, ": Basic");
+    if(basic!=NULL){return 1;}
+
+    return 0;
 }
