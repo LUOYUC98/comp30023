@@ -11,6 +11,7 @@ char url_buffer[MAX_URL_LEN+1];
 char parent_addr_buffer[MAX_URL_LEN+1];
 char input[MAX_DOMAIN_LEN+1];
 char request[200];
+int authes[MAX_URL_NUM];
 
 int main(int argc, char *argv[]){
 	
@@ -19,9 +20,10 @@ int main(int argc, char *argv[]){
 		fprintf(stderr, "Usage: %s <hostname> \n", argv[0]);
 		exit(1); 
 	}
-  
-  strcpy(input, url_ok(argv[1]));
+  bzero(authes, sizeof(int)*MAX_URL_NUM);
+  strcpy(input, argv[1]);
   web_addr[addr_index] = url_ok(argv[1]);
+  printf("web = %s\n", web_addr[addr_index]);
   sequential_visit();
 
 
